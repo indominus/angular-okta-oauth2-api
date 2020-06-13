@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {AuthService} from '../auth/auth.service';
+import {AuthHelper} from '../auth/auth-helper';
 
 @Component({
   selector: 'app-login',
@@ -8,7 +8,7 @@ import {AuthService} from '../auth/auth.service';
 })
 export class LoginComponent implements OnInit {
 
-  constructor(private authService: AuthService) {
+  constructor(private authHelper: AuthHelper) {
   }
 
   ngOnInit(): void {
@@ -16,19 +16,28 @@ export class LoginComponent implements OnInit {
 
   loginRedirect(): void {
 
-    const state = Math.random().toString(20).substr(2, 128);
+    const clientId = 'AtYbjj1aDV69DmdoIa5GglZ6C1WNREPQ';
+
+    const state = this.authHelper.randomString();
     localStorage.setItem('state', state);
 
-    const params = Object.assign({}, {
-      response_type: 'code',
-      client_id: '0oaex9w9fknxXbL4j4x6',
-      redirect_uri: 'http://localhost:4200/callback',
-      scope: 'openid offline_access',
-      state,
-    }, this.authService.getPKCEParams());
+    const verifier = this.authHelper.randomString();
+    localStorage.setItem('verifier', verifier);
 
-    const url = 'https://dev-540489.okta.com/oauth2/default/v1/authorize?' + Object.keys(params).map(key => `${key}=${params[key]}`).join('&');
-    console.log([url]);
-    //window.location.href = url;
+    this.authHelper.generateChallenge(verifier).then((challenge) => {
+      const params = {
+        state,
+        client_id: clientId,
+        response_type: 'code',
+        audience: encodeURIComponent('https://devx.eu.auth0.com/api/v2/'),
+        redirect_uri: encodeURIComponent('http://localhost:4200/callback'),
+        scope: encodeURIComponent('openid offline_access'),
+        code_challenge: challenge,
+        code_challenge_method: 'S256'
+      };
+      window.location.href = 'https://devx.eu.auth0.com/authorize?' + Object.keys(params).map(
+        key => `${key}=${params[key]}`
+      ).join('&');
+    });
   }
 }

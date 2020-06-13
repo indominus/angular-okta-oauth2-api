@@ -8,6 +8,7 @@ import {HomeComponent} from './home/home.component';
 import {CallbackComponent} from './callback/callback.component';
 import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 import {HttpClientModule} from '@angular/common/http';
+import {AuthHelper} from './auth/auth-helper';
 
 @NgModule({
   declarations: [
@@ -22,7 +23,7 @@ import {HttpClientModule} from '@angular/common/http';
     HttpClientModule,
     NgbModule,
   ],
-  providers: [],
+  providers: [AuthHelper],
   bootstrap: [AppComponent],
 })
 export class AppModule {
